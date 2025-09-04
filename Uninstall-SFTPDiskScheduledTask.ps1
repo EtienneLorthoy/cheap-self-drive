@@ -18,6 +18,12 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
+# Global trap to ensure we exit on any unhandled error
+trap {
+    Write-Host "ERROR: $($_.Exception.Message)" -ForegroundColor Red
+    exit 1
+}
+
 function Write-Info { param([string]$m) Write-Host $m -ForegroundColor Cyan }
 function Write-Warn { param([string]$m) Write-Host $m -ForegroundColor Yellow }
 function Write-Err { param([string]$m) Write-Host $m -ForegroundColor Red }
@@ -29,12 +35,12 @@ if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdent
     $argumentList = @()
     $argumentList += '-File'
     $argumentList += "`"$($MyInvocation.MyCommand.Path)`""
-    
+
     if ($ConfigPath -ne (Join-Path $PSScriptRoot 'config.json')) {
         $argumentList += '-ConfigPath'
         $argumentList += "`"$ConfigPath`""
     }
-    
+
     try {
         Start-Process -FilePath 'powershell.exe' -ArgumentList $argumentList -Verb RunAs -Wait
         exit $LASTEXITCODE
@@ -89,17 +95,17 @@ try {
     $allRclone = @(Get-Process -Name rclone -ErrorAction SilentlyContinue)
     $candidateProcesses = @()
     foreach ($p in $allRclone) {
-        $wmi = Get-WmiObject Win32_Process -Filter "ProcessId=$($p.Id)" -ErrorAction SilentlyContinue
-        $cmdLine = $wmi.CommandLine
-        $matches = $false
+        $cim = Get-CimInstance Win32_Process -Filter "ProcessId=$($p.Id)" -ErrorAction SilentlyContinue
+        $cmdLine = $cim.CommandLine
+        $isMatch = $false
         if ($cmdLine) {
-            if ($cmdLine -match [Regex]::Escape("mount ${MountName}:")) { $matches = $true }
-            elseif ($cmdLine -match "\b$($driveLetterOnly):?\b") { $matches = $true }
+            if ($cmdLine -match [Regex]::Escape("mount ${MountName}:")) { $isMatch = $true }
+            elseif ($cmdLine -match "\b$($driveLetterOnly):?\b") { $isMatch = $true }
         } else {
             # No command line accessible; include conservatively
-            $matches = $true
+            $isMatch = $true
         }
-        if ($matches) {
+        if ($isMatch) {
             $candidateProcesses += [pscustomobject]@{
                 ProcessId   = $p.Id
                 Name        = $p.Name
@@ -160,7 +166,7 @@ try {
     }
 
     Write-Ok "Uninstall completed for $MountName."
-    Write-Ok "Installation completed successfully!"
+    Write-Ok "Uninstallation completed successfully!"
     Write-Host "Press any key to continue..." -ForegroundColor Gray
     $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
 }

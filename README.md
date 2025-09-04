@@ -47,7 +47,7 @@ All scripts use a centralized JSON configuration file (`config.json`).
 ```json
 {
   "MountName": "MyNAS",
-  "DriveLetter": "X:",
+  "DriveLetter": "V:",
   "NASAddress": "your_linux_server_ip_address",
   "NASUsername": "your_username", 
   "NASPassword": "your_password",

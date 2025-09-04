@@ -16,7 +16,16 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
-function Msg { param([string]$t,[string]$c='White'); Write-Host $t -ForegroundColor $c }
+# Global trap to ensure we exit on any unhandled error
+trap {
+    Write-Host "ERROR: $($_.Exception.Message)" -ForegroundColor Red
+    exit 1
+}
+
+function Write-Info { param([string]$m) Write-Host $m -ForegroundColor Cyan }
+function Write-Warn { param([string]$m) Write-Host $m -ForegroundColor Yellow }
+function Write-Err { param([string]$m) Write-Host $m -ForegroundColor Red }
+function Write-Ok { param([string]$m) Write-Host $m -ForegroundColor Green }
 
 # Load configuration helper
 . (Join-Path $PSScriptRoot 'ConfigHelper.ps1')

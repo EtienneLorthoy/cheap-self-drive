@@ -6,7 +6,7 @@
 .DESCRIPTION
     This script sets up an automated SFTP drive mount using rclone and Windows Task Scheduler.
     It performs the following operations:
-    
+
     1. Loads configuration from a JSON file (config.json by default)
     2. Installs required dependencies (rclone and WinFsp via winget)
     3. Creates necessary directories for VFS caching and logs
@@ -14,7 +14,7 @@
     5. Generates a mount script from template with concrete configuration values
     6. Creates a Windows Scheduled Task that runs at user logon
     7. Sets up retry policies and execution limits for reliability
-    
+
     The resulting scheduled task will automatically mount the SFTP share as a network drive
     whenever the user logs in, with full VFS caching for improved performance.
 
@@ -67,12 +67,12 @@ if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdent
     $argumentList = @()
     $argumentList += '-File'
     $argumentList += "`"$($MyInvocation.MyCommand.Path)`""
-    
+
     if ($ConfigPath -ne (Join-Path $PSScriptRoot 'config.json')) {
         $argumentList += '-ConfigPath'
         $argumentList += "`"$ConfigPath`""
     }
-    
+
     try {
         Start-Process -FilePath 'powershell.exe' -ArgumentList $argumentList -Verb RunAs -Wait
         exit $LASTEXITCODE
@@ -93,6 +93,13 @@ try {
 }
 catch {
     Write-Host "Configuration Error: $($_.Exception.Message)" -ForegroundColor Red
+    exit 1
+}
+
+# Validate drive letter availability
+$driveLetterOnly = $config.DriveLetter.TrimEnd(':')
+if (Get-PSDrive -Name $driveLetterOnly -ErrorAction SilentlyContinue) {
+    Write-Host "ERROR: Drive letter $($config.DriveLetter) is already in use. Please choose a different drive letter in config.json" -ForegroundColor Red
     exit 1
 }
 
@@ -145,7 +152,7 @@ New-Item -ItemType Directory -Path $VFSCacheDir -Force | Out-Null
 
 Write-Section 'Create rclone base remote'
 # Create the rclone configuration file (include shell_type and force unix shell semantics)
-rclone config create "${MountName}_base" sftp host "$NASAddress" user "$NASUsername" pass "$NASPassword" port "$NASPort" shell_type "$ShellType" --config "$RcloneConfig" 
+rclone config create "${MountName}_base" sftp host "$NASAddress" user "$NASUsername" pass "$NASPassword" port "$NASPort" shell_type "$ShellType" --config "$RcloneConfig"
 
 Write-Section 'Create rclone alias remote'
 # Create the alias remote for mapping the nas path to the root of the future mounted disk
@@ -176,7 +183,7 @@ $description = "Mount ${MountName}: to ${DriveLetter} using rclone with caching 
 $action = New-ScheduledTaskAction -Execute 'powershell.exe' -Argument "-WindowStyle Hidden -File `"$MountScriptPath`""
 $trigger     = New-ScheduledTaskTrigger -AtLogOn
 $currentUser = "$env:USERDOMAIN\$env:USERNAME"
-$principal   = New-ScheduledTaskPrincipal -UserId $currentUser -LogonType Interactive 
+$principal   = New-ScheduledTaskPrincipal -UserId $currentUser -LogonType Interactive
 
 # Retry policy: retry up to 30 times, every 1 minute if the task exits non-success.
 $retryCount    = 30
