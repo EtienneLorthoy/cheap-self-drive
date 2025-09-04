@@ -4,25 +4,33 @@ function Get-SFTPDiskConfig {
     param(
         [string]$ConfigPath = (Join-Path $PSScriptRoot 'config.json')
     )
-    
+
     if (-not (Test-Path $ConfigPath)) {
         throw "Configuration file not found at: $ConfigPath"
     }
-    
+
     try {
         $config = Get-Content -Path $ConfigPath -Raw | ConvertFrom-Json
-        
+
+        # Validate required fields
+        $requiredFields = @('MountName', 'DriveLetter', 'NASAddress', 'NASUsername', 'NASPassword', 'NASPort', 'NASAbsolutePath')
+        foreach ($field in $requiredFields) {
+            if (-not $config.$field -or $config.$field -eq '') {
+                throw "Required configuration field '$field' is missing or empty"
+            }
+        }
+
         # Expand template variables
         $mountName = $config.MountName
         $config.VFSCacheDir = $config.VFSCacheDir -replace '\{MountName\}', $mountName
         $config.RcloneLogs = $config.RcloneLogs -replace '\{MountName\}', $mountName
         $config.RcloneConfigDir = $config.RcloneConfigDir -replace '\{APPDATA\}', $env:APPDATA
-        
+
         # Add computed properties
         $config | Add-Member -NotePropertyName 'RcloneConfig' -NotePropertyValue (Join-Path $config.RcloneConfigDir 'rclone.conf')
         $config | Add-Member -NotePropertyName 'MountScriptPath' -NotePropertyValue "C:\VFS\Mount-$($config.MountName)-SFTPDisk.ps1"
         $config | Add-Member -NotePropertyName 'TaskName' -NotePropertyValue "Rclone Mount $($config.MountName)"
-        
+
         return $config
     }
     catch {
@@ -32,15 +40,15 @@ function Get-SFTPDiskConfig {
 
 function Show-ConfigSummary {
     param($Config)
-    
+
     $maskedPassword = if ($Config.NASPassword) {
-        if ($Config.NASPassword.Length -gt 2) { 
-            $Config.NASPassword.Substring(0,1) + ('*' * ($Config.NASPassword.Length -2)) + $Config.NASPassword[-1] 
-        } else { 
-            '*' * $Config.NASPassword.Length 
+        if ($Config.NASPassword.Length -gt 3) {
+            $Config.NASPassword.Substring(0,1) + ('*' * ($Config.NASPassword.Length -2)) + $Config.NASPassword[-1]
+        } else {
+            '*' * $Config.NASPassword.Length
         }
-    } else { 
-        '<empty>' 
+    } else {
+        '<empty>'
     }
 
     [pscustomobject]@{

@@ -46,7 +46,6 @@ try {
     Write-Host "Executing rclone mount ..."
     Start-Process -FilePath "rclone" -ArgumentList $arguments  -WindowStyle Hidden
     $exit = $LASTEXITCODE
-    $level = if ($exit -eq 0) { 'INFO' } else { 'ERROR' }
     $color = if ($exit -eq 0) { 'Green' } else { 'Red' }
     Write-Host "rclone exited with code $exit" -ForegroundColor $color
     exit $exit
