@@ -1,6 +1,6 @@
 # SFTP Auto Mount Disk - Configuration Guide
 
-This project provides PowerShell scripts to mount SFTP drives using rclone and Windows Scheduled Tasks.
+This project provides PowerShell scripts to mount SFTP drives using rclone and Windows Scheduled Tasks. This is meant to use rclone with VFS caching which operates in a similar way GoogleDrive or OneDrive desktop apps do. You can list the entirety of your online folder as a Windows Drive without downloading anything, and when you open a file it downloads that files live and keep in a cache for a while for faster access. 
 
     1. Loads configuration from a JSON file (config.json by default)
     2. Installs required dependencies (rclone and WinFsp via winget)
