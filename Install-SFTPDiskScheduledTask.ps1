@@ -1,45 +1,32 @@
-
 <#
 .SYNOPSIS
-    Installs and configures an rclone SFTP mount as a Windows Scheduled Task.
+    Creates a Windows Scheduled Task to automatically mount an SFTP drive using rclone.
 
 .DESCRIPTION
-    This script sets up an automated SFTP drive mount using rclone and Windows Task Scheduler.
-    It performs the following operations:
-    
-    1. Loads configuration from a JSON file (config.json by default)
-    2. Installs required dependencies (rclone and WinFsp via winget)
-    3. Creates necessary directories for VFS caching and logs
-    4. Configures rclone remotes for SFTP connection
-    5. Generates a mount script from template with concrete configuration values
-    6. Creates a Windows Scheduled Task that runs at user logon
-    7. Sets up retry policies and execution limits for reliability
-    
-    The resulting scheduled task will automatically mount the SFTP share as a network drive
-    whenever the user logs in, with full VFS caching for improved performance.
+    This script configures and registers a Windows Scheduled Task that will automatically mount 
+    an SFTP drive at user logon using rclone with VFS caching. The script performs the following:
+    - Generates a mount script from template with configuration values
+    - Creates a scheduled task that runs at logon with SYSTEM privileges
+    - Configures retry policies for reliable mounting
+    - Sets up the task to run hidden in the background
 
 .PARAMETER ConfigPath
-    Path to the JSON configuration file. Defaults to 'config.json' in the script directory.
-    The configuration file should contain SFTP connection details, mount settings, and paths.
+    Path to the JSON configuration file containing SFTP connection details and mount settings.
+    If not specified, uses 'config.json' in the script directory.
 
 .EXAMPLE
     .\Install-SFTPDiskScheduledTask.ps1
-    Installs using the default config.json file in the script directory.
+    Installs the scheduled task using the default config.json file.
 
 .EXAMPLE
-    .\Install-SFTPDiskScheduledTask.ps1 -ConfigPath "C:\MyConfigs\production.json"
-    Installs using a custom configuration file.
+    .\Install-SFTPDiskScheduledTask.ps1 -ConfigPath "C:\MyConfig\nas-config.json"
+    Installs the scheduled task using a custom configuration file.
 
 .NOTES
-    - Requires Administrator privileges to create scheduled tasks and install software
-    - Depends on winget for installing rclone and WinFsp
-    - Creates a mount script in C:\VFS\ that the scheduled task will execute
-    - The scheduled task runs with the current user's credentials
-    - Supports retry policies: up to 30 retries with 1-minute intervals
-
-.LINK
-    https://rclone.org/
-    https://github.com/winfsp/winfsp
+    - Requires administrator privileges to create scheduled tasks
+    - Password must be set separately using Manage-Passwords.ps1 before running this script
+    - The generated mount script will be created in C:\VFS\Mount-{MountName}-SFTPDisk.ps1
+    - Task will retry up to 30 times with 1-minute intervals on failure
 #>
 
 param(
@@ -57,14 +44,7 @@ $ErrorActionPreference = 'Stop'
 
 # Global trap to ensure we exit on any unhandled error
 trap {
-    Write-Host "ERROR: $($_.Exception.Message)" -ForegroundColor Red
-    exit 1
-}
-
-if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
-    Write-Warn 'SYSTEM privileges are required. Please run this script from an elevated PowerShell prompt.'
-    # exit
-    exit 1
+    throw "ERROR: $($_.Exception.Message)"
 }
 
 # Load configuration helper
@@ -84,7 +64,6 @@ $MountName = $config.MountName
 $DriveLetter = $config.DriveLetter
 $NASAddress = $config.NASAddress
 $NASUsername = $config.NASUsername
-$NASPassword = $config.NASPassword
 $NASPort = $config.NASPort
 $NASAbsolutePath = $config.NASAbsolutePath
 $VFSCacheDir = $config.VFSCacheDir
@@ -94,32 +73,7 @@ $ShellType = $config.ShellType
 $MountScriptPath = $config.MountScriptPath
 $TaskName = $config.TaskName
 
-# Helper: uniform section banner (similar style to existing config summary line)
-function Write-Section {
-    param([Parameter(Mandatory)][string]$Title)
-    $pad = '=' * 8
-    Write-Host ("$pad $Title $pad") -ForegroundColor Cyan
-}
-
-# Create rclone config directory
-$RcloneConfigDir = Split-Path $RcloneConfig -Parent
-New-Item -ItemType Directory -Path $RcloneConfigDir -Force | Out-Null
-
-whoami
-
-Write-Section 'Create VFS Cache Directory'
-# Create the folder for the VFS cache to work
-New-Item -ItemType Directory -Path $VFSCacheDir -Force | Out-Null
-
-Write-Section 'Create rclone base remote'
-# Create the rclone configuration file (include shell_type and force unix shell semantics)
-rclone config create "${MountName}_base" sftp host "$NASAddress" user "$NASUsername" pass "$NASPassword" port "$NASPort" shell_type "$ShellType" --config "$RcloneConfig" 
-
-Write-Section 'Create rclone alias remote'
-# Create the alias remote for mapping the nas path to the root of the future mounted disk
-rclone config --config "$RcloneConfig" create "$MountName" alias remote "${MountName}_base:$NASAbsolutePath"
-
-Write-Section 'Generate Mount Script'
+Write-Host "======== Generate Mount Script ========" -ForegroundColor Cyan
 # Path for the generated mount script invoked by the Scheduled Task
 $TemplatePath    = Join-Path $PSScriptRoot 'Mount-TEMPLATE-SFTPDisk.ps1'
 if (-not (Test-Path $TemplatePath)) { throw "Template mount script not found at $TemplatePath" }
@@ -136,7 +90,7 @@ $processed = $template `
 Set-Content -Path $MountScriptPath -Value $processed -Encoding UTF8
 Write-Host "Mount script (from template) created at $MountScriptPath"
 
-Write-Section 'Register Scheduled Task'
+Write-Host "======== Register Scheduled Task ========" -ForegroundColor Cyan
 # Scheduled Task will now call the generated mount script directly so the logic lives outside the task definition.
 $description = "Mount ${MountName}: to ${DriveLetter} using rclone with caching options"
 
@@ -160,9 +114,3 @@ if (Get-ScheduledTask -TaskName $TaskName -ErrorAction SilentlyContinue) {
 Register-ScheduledTask -TaskName $TaskName -Action $action -Trigger $trigger -Principal $principal -Settings $settings -Description $description
 
 Write-Host "Scheduled Task '$TaskName' created/updated with cache dir $VFSCacheDir."
-
-Write-Host ""
-Write-Ok "Installation completed successfully!"
-Write-Host "Press any key to continue..." -ForegroundColor Gray
-$null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
-

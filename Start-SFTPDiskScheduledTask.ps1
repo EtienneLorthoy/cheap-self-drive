@@ -16,7 +16,29 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
-function Msg { param([string]$t,[string]$c='White'); Write-Host $t -ForegroundColor $c }
+# Check for administrator privileges
+if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+    Write-Host 'Administrator privileges are required. Restarting as administrator...'
+
+    $argumentList = @()
+    $argumentList += '-File'
+    $argumentList += "`"$($MyInvocation.MyCommand.Path)`""
+    
+    if ($ConfigPath -ne (Join-Path $PSScriptRoot 'config.json')) {
+        $argumentList += '-ConfigPath'
+        $argumentList += "`"$ConfigPath`""
+    }
+    
+    try {
+        Start-Process -FilePath 'powershell.exe' -ArgumentList $argumentList -Verb RunAs -Wait
+        exit $LASTEXITCODE
+    }
+    catch {
+        Write-Host "Failed to restart as administrator: $($_.Exception.Message)"
+        Write-Host 'Please manually run this script in an elevated PowerShell session.'
+        exit 1
+    }
+}
 
 # Load configuration helper
 . (Join-Path $PSScriptRoot 'ConfigHelper.ps1')
@@ -33,7 +55,7 @@ catch {
 $taskName = $config.TaskName
 Write-Host "Starting scheduled task: $taskName" -ForegroundColor Cyan
 
-$task = Get-ScheduledTask -TaskName $taskName -ErrorAction SilentlyContinue
+$task = Get-ScheduledTask -TaskName $taskName
 if (-not $task) {
     Write-Host "Task '$taskName' not found. Run Install-SFTPDiskScheduledTask.ps1 first." -ForegroundColor Red
     exit 2

@@ -1,35 +1,36 @@
+
 <#
 .SYNOPSIS
-    Bootstrap installer for SFTP Disk Scheduled Task setup.
+    Bootstrap installer for CheapSelfDrive SFTP mount system with automatic dependency management.
 
 .DESCRIPTION
-    This script serves as a bootstrap installer that:
-    1. Installs PStools (including PsExec) via winget
-    2. Launches the main installation script with SYSTEM account privileges using PsExec
+    This is the main installer script for CheapSelfDrive that handles the complete setup process:
+    - Installs required dependencies (rclone, WinFsp) via winget
+    - Manages password retrieval from Windows Credential Manager
+    - Creates rclone configuration for SFTP connection
+    - Sets up VFS cache directories
+    - Launches the scheduled task installer directly
     
-    This approach ensures the scheduled task is properly created with SYSTEM privileges
-    and can run reliably during system startup and user logon scenarios.
+    This script automatically elevates to administrator privileges if needed and ensures
+    all dependencies are properly installed before proceeding with the main installation.
 
 .PARAMETER ConfigPath
-    Path to the JSON configuration file to pass to the main installation script.
-    Defaults to 'config.json' in the script directory.
+    Path to the JSON configuration file containing SFTP connection details and mount settings.
+    If not specified, uses 'config.json' in the script directory.
 
 .EXAMPLE
-    .\Bootstrap-Install.ps1
-    Runs the bootstrap installation with default config.json
+    .\Install-CheapSelfDrive.ps1
+    Performs complete installation using the default config.json file.
 
 .EXAMPLE
-    .\Bootstrap-Install.ps1 -ConfigPath "C:\MyConfigs\production.json"
-    Runs the bootstrap installation with a custom configuration file.
+    .\Install-CheapSelfDrive.ps1 -ConfigPath "C:\MyConfig\nas-config.json"
+    Performs complete installation using a custom configuration file.
 
 .NOTES
-    - Requires Administrator privileges to install software and use PsExec
-    - Installs PStools via winget if not already available
-    - Uses PsExec to run the main installation script as SYSTEM account
-    - The -s flag runs as SYSTEM, -i flag allows interaction with desktop
-
-.LINK
-    https://docs.microsoft.com/en-us/sysinternals/downloads/psexec
+    - Automatically elevates to administrator privileges if needed
+    - Password must be stored in Windows Credential Manager before running (use Set-Password.ps1)
+    - Requires internet connection to download dependencies via winget
+    - Creates rclone remotes for both base SFTP connection and alias for the target path
 #>
 
 param(
@@ -75,7 +76,7 @@ if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdent
     }
 }
 
-Write-Host "Installer Script Starting..." -ForegroundColor Cyan
+Write-Host "Cheap Self-Drive Script Installer" -ForegroundColor Cyan
 
 # ===================== Configuration Summary ======================
 # Load configuration helper
@@ -91,43 +92,13 @@ catch {
 }
 
 Write-Host "=======================================================" -ForegroundColor Cyan
-Write-Host ""
 Write-Host 'Configuration Summary'
 Show-ConfigSummary -Config $config
 
-Write-Host "=======================================================" -ForegroundColor Cyan
-$proceed = Read-Host "Proceed with installation and mounting steps? (Y/N)"
-if ($proceed -notin @('Y','y')) {
-    Write-Host "Aborted by user."
-    # pause for 3 seconds before exit
-    Start-Sleep -Seconds 10
-}
-Write-Host ""
-
-Write-Host ""
-Write-Info "Bootstrap Installer for SFTP Disk Scheduled Task"
-Write-Host "=================================================" -ForegroundColor Cyan
-Write-Host ""
-
 # Step 1: Install dependencies
+Write-Host "=======================================================" -ForegroundColor Cyan
+Write-Host ""
 Write-Info "Step 1: Installing required dependencies..."
-
-# Install PStools (includes PsExec)
-Write-Info "Installing PStools (includes PsExec)..."
-try {
-    winget install Microsoft.Sysinternals.PSTools --silent --accept-source-agreements --accept-package-agreements
-    if ($LASTEXITCODE -eq 0) {
-        Write-Ok "PStools installed successfully"
-    } elseif ($LASTEXITCODE -eq -1978335189) {
-        Write-Info "PStools already installed (or newer version available)"
-    } else {
-        Write-Warn "PStools installation returned exit code: $LASTEXITCODE"
-    }
-}
-catch {
-    Write-Err "Failed to install PStools: $($_.Exception.Message)"
-    throw
-}
 
 # Install rclone
 Write-Info "Installing rclone..."
@@ -163,87 +134,82 @@ catch {
     throw
 }
 
-# Refresh PATH to ensure PsExec is available
+# Refresh PATH to ensure tools are available
 $env:PATH = [System.Environment]::GetEnvironmentVariable("PATH", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("PATH", "User")
 
-# Step 2: Verify PsExec is available
-Write-Info "Step 2: Verifying PsExec availability..."
-try {
-    $psexecPath = Get-Command "PsExec.exe" -ErrorAction SilentlyContinue
-    if (-not $psexecPath) {
-        # Try common installation paths
-        $commonPaths = @(
-            "${env:ProgramFiles}\Sysinternals\PsExec.exe",
-            "${env:LOCALAPPDATA}\Microsoft\WindowsApps\PsExec.exe",
-            "C:\PsTools\PsExec.exe"
-        )
-        
-        foreach ($path in $commonPaths) {
-            if (Test-Path $path) {
-                $psexecPath = $path
-                break
-            }
-        }
-        
-        if (-not $psexecPath) {
-            throw "PsExec.exe not found in PATH or common installation directories"
-        }
-    } else {
-        $psexecPath = $psexecPath.Source
-    }
-    
-    Write-Ok "PsExec found at: $psexecPath"
-}
-catch {
-    Write-Err "PsExec verification failed: $($_.Exception.Message)"
-    Write-Err "Please ensure PStools is properly installed and PsExec.exe is accessible"
-    throw
-}
-
-# Step 3: Prepare main installation script path and arguments
+# Step 2: Prepare main installation script path
 $mainScriptPath = Join-Path $PSScriptRoot 'Install-SFTPDiskScheduledTask.ps1'
 if (-not (Test-Path $mainScriptPath)) {
     throw "Main installation script not found at: $mainScriptPath"
 }
 
-Write-Info "Step 3: Launching main installation script with SYSTEM privileges..."
+Write-Host ""
+Write-Info "Step 2: Retrieving the password from Windows Credential Manager..."
+# Retrieve password from Windows Credential Manager
+$securePassword = Get-SecurePassword -MountName $config.MountName
+if (!$securePassword) {
+    throw "No password found for mount '$($config.MountName)'. Please set password using Set-SecurePassword function."
+}
+# Convert SecureString to plain text for rclone config (temporary, will be cleared)
+$PlainPassword = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto([System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($securePassword))
+
+Write-Host ""
+Write-Info "Step 3: Creating rclone configuration..."
+# Extract variables from config
+$MountName = $config.MountName
+$DriveLetter = $config.DriveLetter
+$NASAddress = $config.NASAddress
+$NASUsername = $config.NASUsername
+$NASPort = $config.NASPort
+$NASAbsolutePath = $config.NASAbsolutePath
+$VFSCacheDir = $config.VFSCacheDir
+$RcloneLogs = $config.RcloneLogs
+$RcloneConfig = $config.RcloneConfig
+$ShellType = $config.ShellType
+$MountScriptPath = $config.MountScriptPath
+$TaskName = $config.TaskName
+
+# Create rclone config directory
+$RcloneConfigDir = Split-Path $RcloneConfig -Parent
+New-Item -ItemType Directory -Path $RcloneConfigDir -Force | Out-Null
+
+Write-Host "Create VFS Cache Directory"
+# Create the folder for the VFS cache to work
+New-Item -ItemType Directory -Path $VFSCacheDir -Force | Out-Null
+
+Write-Host "Create rclone base remote"
+# Create the rclone configuration file (include shell_type and force unix shell semantics)
+rclone config create "${MountName}_base" sftp host "$NASAddress" user "$NASUsername" pass "$PlainPassword" port "$NASPort" shell_type "$ShellType" --config "$RcloneConfig" 
+
+Write-Host "Create rclone alias remote"
+# Create the alias remote for mapping the nas path to the root of the future mounted disk
+rclone config --config "$RcloneConfig" create "$MountName" alias remote "${MountName}_base:$NASAbsolutePath"
+
+Write-Host ""
+Write-Info "Step 4: Installing scheduled task..."
 Write-Host "Main script: $mainScriptPath" -ForegroundColor Gray
 Write-Host "Config file: $ConfigPath" -ForegroundColor Gray
 Write-Host ""
 
-# Prepare arguments for the main script
-$scriptArgs = "-File `"$mainScriptPath`""
-if ($ConfigPath -ne (Join-Path $PSScriptRoot 'config.json')) {
-    $scriptArgs += " -ConfigPath `"$ConfigPath`""
-}
-
-# Build PsExec command
-# -s: Run as SYSTEM account
-# -i: Allow interaction with desktop (required for the installation prompts)
-# -d: Don't wait for process to terminate (we want to see the output)
-$psexecArgs = @(
-    '-s',
-    '-i',
-    'powershell.exe',
-    $scriptArgs
-)
-
 try {
-    Write-Info "Executing: PsExec $($psexecArgs -join ' ')"
-    Write-Host ""
     
-    # Start the process and wait for completion
-    $process = Start-Process -FilePath $psexecPath -ArgumentList $psexecArgs -Wait -PassThru -NoNewWindow
+    if ($ConfigPath -ne (Join-Path $PSScriptRoot 'config.json')) {
+        & $mainScriptPath -ConfigPath $ConfigPath
+    } else {
+        & $mainScriptPath
+    }
     
-    if ($process.ExitCode -eq 0) {
+    $exitCode = $LASTEXITCODE
+    
+    if ($exitCode -eq 0) {
         Write-Host ""
         Write-Ok "Main installation completed successfully!"
     } else {
         Write-Host ""
-        Write-Warn "Main installation exited with code: $($process.ExitCode)"
+        Write-Warn "Main installation exited with code: $exitCode"
     }
     
-    exit $process.ExitCode
+    exit $exitCode
 }
 catch {
     Write-Err "Failed to execute main installation script: $($_.Exception.Message)"

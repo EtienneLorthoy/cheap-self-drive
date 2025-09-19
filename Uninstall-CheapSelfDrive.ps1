@@ -1,14 +1,37 @@
 <#
-Uninstall-SFTPDiskScheduledTask.ps1
+.SYNOPSIS
+    Completely removes CheapSelfDrive SFTP mount system and cleans up all related components.
 
-Simple uninstall script for rclone SFTP mount created by Install-SFTPDiskScheduledTask.ps1.
+.DESCRIPTION
+    This script performs a comprehensive uninstallation of the CheapSelfDrive system:
+    - Stops and removes the Windows Scheduled Task
+    - Terminates any running rclone mount processes
+    - Removes PSDrive mappings
+    - Cleans up VFS cache directories and log files
+    - Removes the generated mount script
+    - Deletes stored passwords from Windows Credential Manager
+    - Removes rclone remote configurations (both base and alias)
+    
+    The script carefully identifies and stops only the rclone processes related to the
+    specific mount configuration to avoid affecting other rclone operations.
 
-Parameters:
-    -ConfigPath: Path to the JSON configuration file (default: config.json in script directory)
+.PARAMETER ConfigPath
+    Path to the JSON configuration file containing SFTP connection details and mount settings.
+    If not specified, uses 'config.json' in the script directory.
 
-Examples:
-    powershell -File .\Uninstall-SFTPDiskScheduledTask.ps1
-    powershell -File .\Uninstall-SFTPDiskScheduledTask.ps1 -ConfigPath "C:\MyConfigs\nas.json"
+.EXAMPLE
+    .\Uninstall-CheapSelfDrive.ps1
+    Removes the SFTP mount system using the default config.json file.
+
+.EXAMPLE
+    .\Uninstall-CheapSelfDrive.ps1 -ConfigPath "C:\MyConfig\nas-config.json"
+    Removes the SFTP mount system using a custom configuration file.
+
+.NOTES
+    - Automatically elevates to administrator privileges if needed
+    - Safely identifies and stops only matching rclone processes
+    - Removes all traces of the installation including cached files and credentials
+    - Use this script to completely clean up before reinstalling or when no longer needed
 #>
 
 param(
@@ -147,7 +170,11 @@ try {
         Remove-Item -Path $mountScriptPath -Force -ErrorAction SilentlyContinue
     }
 
-    # 7. Remove rclone remotes via rclone CLI (alias and base)
+    # 7. Remove stored password
+    Write-Info "Removing stored password for mount '$MountName'..."
+    Remove-SecurePassword -MountName $MountName
+
+    # 8. Remove rclone remotes via rclone CLI (alias and base)
     foreach ($remote in @("${MountName}_base", $MountName)) {
         Write-Info "Deleting rclone remote '$remote'..."
         & rclone config delete $remote --config $rcloneConfig --auto-confirm 2>$null
@@ -161,8 +188,6 @@ try {
 
     Write-Ok "Uninstall completed for $MountName."
     Write-Ok "Installation completed successfully!"
-    Write-Host "Press any key to continue..." -ForegroundColor Gray
-    $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
 }
 catch {
     Write-Err $_.Exception.Message
