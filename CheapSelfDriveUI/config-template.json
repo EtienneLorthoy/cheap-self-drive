@@ -1,0 +1,12 @@
+{
+  "MountName": "MyNAS",
+  "DriveLetter": "X:",
+  "NASAddress": "192.168.1.100",
+  "NASUsername": "your_username",
+  "NASPort": 22,
+  "NASAbsolutePath": "/path/to/remote/folder",
+  "ShellType": "unix",
+  "VFSCacheDir": "C:\\VFS\\{MountName}",
+  "RcloneLogs": "C:\\VFS\\{MountName}.log",
+  "RcloneConfigDir": "{APPDATA}\\rclone"
+}
