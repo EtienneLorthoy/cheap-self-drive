@@ -62,26 +62,9 @@ trap {
 }
 
 if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
-    Write-Warn 'Administrator privileges are required. Restarting as administrator...'
-
-    $argumentList = @()
-    $argumentList += '-File'
-    $argumentList += "`"$($MyInvocation.MyCommand.Path)`""
-    
-    if ($ConfigPath -ne (Join-Path $PSScriptRoot 'config.json')) {
-        $argumentList += '-ConfigPath'
-        $argumentList += "`"$ConfigPath`""
-    }
-    
-    try {
-        Start-Process -FilePath 'powershell.exe' -ArgumentList $argumentList -Verb RunAs -Wait
-        exit $LASTEXITCODE
-    }
-    catch {
-        Write-Err "Failed to restart as administrator: $($_.Exception.Message)"
-        Write-Err 'Please manually run this script in an elevated PowerShell session.'
-        exit 1
-    }
+    Write-Warn 'SYSTEM privileges are required. Please run this script from an elevated PowerShell prompt.'
+    # exit
+    exit 1
 }
 
 # Load configuration helper
@@ -122,22 +105,7 @@ function Write-Section {
 $RcloneConfigDir = Split-Path $RcloneConfig -Parent
 New-Item -ItemType Directory -Path $RcloneConfigDir -Force | Out-Null
 
-# ===================== Configuration Summary ======================
-Write-Host ""
-Write-Section 'Configuration Summary'
-Show-ConfigSummary -Config $config
-
-Write-Host "=======================================================" -ForegroundColor Cyan
-$proceed = Read-Host "Proceed with installation and mounting steps? (Y/N)"
-if ($proceed -notin @('Y','y')) {
-    Write-Host "Aborted by user."
-    return
-}
-Write-Host ""
-
-Write-Section 'Install Dependencies'
-winget install rclone --silent
-winget install winfsp --silent
+whoami
 
 Write-Section 'Create VFS Cache Directory'
 # Create the folder for the VFS cache to work
@@ -175,8 +143,7 @@ $description = "Mount ${MountName}: to ${DriveLetter} using rclone with caching 
 # Action: run PowerShell executing the mount script file
 $action = New-ScheduledTaskAction -Execute 'powershell.exe' -Argument "-WindowStyle Hidden -File `"$MountScriptPath`""
 $trigger     = New-ScheduledTaskTrigger -AtLogOn
-$currentUser = "$env:USERDOMAIN\$env:USERNAME"
-$principal   = New-ScheduledTaskPrincipal -UserId $currentUser -LogonType Interactive 
+$principal   = New-ScheduledTaskPrincipal -UserId "SYSTEM" -LogonType ServiceAccount -RunLevel Highest 
 
 # Retry policy: retry up to 30 times, every 1 minute if the task exits non-success.
 $retryCount    = 30

@@ -31,10 +31,10 @@ try {
         '--log-file'; $RcloneLogs
         '--config'; $RcloneConfig
         '--vfs-cache-mode'; 'full'
-        '--vfs-cache-max-size'; '10G'
+        '--vfs-cache-max-size'; '20G'
         '--vfs-cache-max-age'; '168h'
-        '--dir-cache-time'; '72h'
-        '--poll-interval'; '30s'
+        '--dir-cache-time'; '30h'
+        '--poll-interval'; '15s'
         '--buffer-size'; '16M'
         '--vfs-cache-min-free-space'; '20G'
         '--cache-dir'; $VFSCacheDir
