@@ -232,7 +232,7 @@ function Get-SFTPDiskConfig {
         # Add computed properties
         $config | Add-Member -NotePropertyName 'RcloneConfig' -NotePropertyValue (Join-Path $config.RcloneConfigDir 'rclone.conf')
         $config | Add-Member -NotePropertyName 'MountScriptPath' -NotePropertyValue "C:\VFS\Mount-$($config.MountName)-SFTPDisk.ps1"
-        $config | Add-Member -NotePropertyName 'TaskName' -NotePropertyValue "Rclone Mount $($config.MountName)"
+        $config | Add-Member -NotePropertyName 'TaskName' -NotePropertyValue "$($config.MountName) Rclone Mount"
         
         # Remove any password field from config if it exists (ignore it completely)
         if ($config.PSObject.Properties.Name -contains 'NASPassword') {

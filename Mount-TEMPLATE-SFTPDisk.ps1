@@ -74,7 +74,7 @@ try {
         '--cache-dir'; $VFSCacheDir
         '--network-mode'
         '--file-perms=0777'
-        '-o FileSecurity="D:P(A;;FRFWFX;;;WD)'
+        '-o FileSecurity="D:P(A;;FA;;;WD)"'
         '--vfs-refresh'
         '--volname'; ${MountName} 
         '--links'
