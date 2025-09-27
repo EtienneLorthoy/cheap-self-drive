@@ -1,5 +1,5 @@
 {
-  "title": "CheapSelfDrive Manager",
+  "title": "Cheap Self Drive Installer",
   "subtitle": "Cloud drive like",
   "backgroundColor": "#f0f0f0",
   "titleColor": "#2c3e50",
@@ -7,10 +7,11 @@
   "titleFont": "Segoe UI",
   "subtitleFont": "Segoe UI",
   "titleSize": 18,
-  "subtitleSize": 12,
+  "subtitleSize": 10,
   "logoPath": "",
   "logoWidth": 64,
   "logoHeight": 64,
   "alignment": "center",
-  "padding": 10
+  "padding": 10,
+  "installOnly": true
 }

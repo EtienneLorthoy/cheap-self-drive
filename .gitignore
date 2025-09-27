@@ -47,3 +47,4 @@ nunit-*.xml
 config.json
 CheapSelfDriveUI/.vs
 CheapSelfDriveUI/CheapSelfDriveUI.csproj.user
+config.*.json

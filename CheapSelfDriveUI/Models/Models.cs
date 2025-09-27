@@ -62,6 +62,7 @@ public class BannerConfig
     public int LogoHeight { get; set; } = 64;
     public string Alignment { get; set; } = "center";
     public int Padding { get; set; } = 10;
+    public bool InstallOnly { get; set; } = false;
 }
 
 public enum MountStatus

@@ -140,7 +140,8 @@ $env:PATH = [System.Environment]::GetEnvironmentVariable("PATH", "Machine") + ";
 # Step 2: Prepare main installation script path
 $mainScriptPath = Join-Path $PSScriptRoot 'Install-SFTPDiskScheduledTask.ps1'
 if (-not (Test-Path $mainScriptPath)) {
-    throw "Main installation script not found at: $mainScriptPath"
+    Write-Host  "Main installation script not found at: $mainScriptPath"
+    Read-Host "Press Enter to exit..."
 }
 
 Write-Host ""
@@ -148,7 +149,9 @@ Write-Info "Step 2: Retrieving the password from Windows Credential Manager..."
 # Retrieve password from Windows Credential Manager
 $securePassword = Get-SecurePassword -MountName $config.MountName
 if (!$securePassword) {
-    throw "No password found for mount '$($config.MountName)'. Please set password using Set-SecurePassword function."
+    Write-Host "No password found for mount '$($config.MountName)'. Please set password using Set-SecurePassword function." -BackgroundColor Red
+    Read-Host "Press Enter to exit..."
+    exit 1
 }
 # Convert SecureString to plain text for rclone config (temporary, will be cleared)
 $PlainPassword = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto([System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($securePassword))
@@ -207,11 +210,13 @@ try {
     } else {
         Write-Host ""
         Write-Warn "Main installation exited with code: $exitCode"
+        Read-Host "Press Enter to exit..."
     }
     
     exit $exitCode
 }
 catch {
     Write-Err "Failed to execute main installation script: $($_.Exception.Message)"
+    Read-Host "Press Enter to exit..."
     throw
 }

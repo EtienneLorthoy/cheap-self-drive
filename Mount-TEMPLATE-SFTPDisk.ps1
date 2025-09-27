@@ -66,7 +66,7 @@ try {
         '--config'; $RcloneConfig
         '--vfs-cache-mode'; 'full'
         '--vfs-cache-max-size'; '20G'
-        '--vfs-cache-max-age'; '168h'
+        '--vfs-cache-max-age'; '14d'
         '--dir-cache-time'; '30s'
         '--poll-interval'; '15s'
         '--buffer-size'; '16M'
@@ -74,6 +74,9 @@ try {
         '--cache-dir'; $VFSCacheDir
         '--network-mode'
         '--file-perms=0777'
+        '-o FileSecurity="D:P(A;;FRFWFX;;;WD)'
+        '--vfs-refresh'
+        '--volname'; ${MountName} 
         '--links'
     )
 

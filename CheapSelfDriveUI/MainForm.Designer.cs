@@ -104,16 +104,16 @@ namespace CheapSelfDriveUI
             lblTitle.ForeColor = Color.FromArgb(44, 62, 80);
             lblTitle.Location = new Point(20, 15);
             lblTitle.Name = "lblTitle";
-            lblTitle.Size = new Size(296, 32);
+            lblTitle.Size = new Size(310, 32);
             lblTitle.TabIndex = 0;
-            lblTitle.Text = "CheapSelfDrive Manager";
+            lblTitle.Text = "Cheap Self Drive Manager";
             // 
             // lblSubtitle
             // 
             lblSubtitle.AutoSize = true;
             lblSubtitle.Font = new Font("Segoe UI", 12F);
             lblSubtitle.ForeColor = Color.FromArgb(127, 140, 141);
-            lblSubtitle.Location = new Point(20, 45);
+            lblSubtitle.Location = new Point(30, 45);
             lblSubtitle.Name = "lblSubtitle";
             lblSubtitle.Size = new Size(203, 21);
             lblSubtitle.TabIndex = 1;
@@ -127,7 +127,7 @@ namespace CheapSelfDriveUI
             grpMountSettings.Controls.Add(txtDriveLetter);
             grpMountSettings.Location = new Point(12, 95);
             grpMountSettings.Name = "grpMountSettings";
-            grpMountSettings.Size = new Size(200, 120);
+            grpMountSettings.Size = new Size(200, 130);
             grpMountSettings.TabIndex = 1;
             grpMountSettings.TabStop = false;
             grpMountSettings.Text = "Mount Settings";
@@ -282,12 +282,12 @@ namespace CheapSelfDriveUI
             grpPathsAndCaching.Controls.Add(lblLogFile);
             grpPathsAndCaching.Controls.Add(txtLogFile);
             grpPathsAndCaching.Controls.Add(txtRcloneDir);
-            grpPathsAndCaching.Location = new Point(12, 225);
+            grpPathsAndCaching.Location = new Point(12, 231);
             grpPathsAndCaching.Name = "grpPathsAndCaching";
-            grpPathsAndCaching.Size = new Size(200, 140);
+            grpPathsAndCaching.Size = new Size(200, 128);
             grpPathsAndCaching.TabIndex = 3;
             grpPathsAndCaching.TabStop = false;
-            grpPathsAndCaching.Text = "Paths & Caching";
+            grpPathsAndCaching.Text = "Paths";
             // 
             // lblVFSCache
             // 
@@ -417,7 +417,7 @@ namespace CheapSelfDriveUI
             grpActions.Controls.Add(btnUninstall);
             grpActions.Controls.Add(btnStartMount);
             grpActions.Controls.Add(btnTest);
-            grpActions.Location = new Point(12, 375);
+            grpActions.Location = new Point(12, 369);
             grpActions.Name = "grpActions";
             grpActions.Size = new Size(798, 60);
             grpActions.TabIndex = 5;
@@ -464,7 +464,7 @@ namespace CheapSelfDriveUI
             // 
             grpStatusAndLogs.Controls.Add(lblStatus);
             grpStatusAndLogs.Controls.Add(txtLogs);
-            grpStatusAndLogs.Location = new Point(12, 445);
+            grpStatusAndLogs.Location = new Point(12, 441);
             grpStatusAndLogs.Name = "grpStatusAndLogs";
             grpStatusAndLogs.Size = new Size(798, 150);
             grpStatusAndLogs.TabIndex = 6;

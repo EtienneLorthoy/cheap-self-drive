@@ -96,7 +96,7 @@ $description = "Mount ${MountName}: to ${DriveLetter} using rclone with caching 
 
 # Action: run PowerShell executing the mount script file
 $action = New-ScheduledTaskAction -Execute 'powershell.exe' -Argument "-WindowStyle Hidden -File `"$MountScriptPath`""
-$trigger     = New-ScheduledTaskTrigger -AtLogOn
+$trigger     = New-ScheduledTaskTrigger -AtStartup
 $principal   = New-ScheduledTaskPrincipal -UserId "SYSTEM" -LogonType ServiceAccount -RunLevel Highest 
 
 # Retry policy: retry up to 30 times, every 1 minute if the task exits non-success.

@@ -1,3 +1,5 @@
+using CheapSelfDriveUI.Services;
+
 namespace CheapSelfDriveUI;
 
 internal static class Program
@@ -6,6 +8,19 @@ internal static class Program
     static void Main()
     {
         ApplicationConfiguration.Initialize();
-        Application.Run(new MainForm());
+        
+        // Check banner configuration to determine which form to show
+        var configManager = new Services.ConfigurationManager();
+        var bannerPath = Path.Combine(Application.StartupPath, "banner-default.json");
+        var bannerConfig = configManager.LoadBannerConfiguration(bannerPath);
+        
+        if (bannerConfig.InstallOnly)
+        {
+            Application.Run(new InstallOnlyForm());
+        }
+        else
+        {
+            Application.Run(new MainForm());
+        }
     }
 }
