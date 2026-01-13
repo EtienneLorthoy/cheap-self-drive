@@ -73,7 +73,7 @@ public partial class InstallOnlyForm : Form
                 }
             }
 
-            UpdateStatus("Configuration loaded successfully", LogLevel.Success);
+            UpdateStatus($"Configuration {_currentConfig.DriveLetter}{_currentConfig.MountName} loaded successfully", LogLevel.Success);
         }
         catch (Exception ex)
         {
@@ -100,18 +100,14 @@ public partial class InstallOnlyForm : Form
         {
             pnlBanner.BackColor = ColorTranslator.FromHtml(_bannerConfig.BackgroundColor);
             lblTitle.Text = _bannerConfig.Title;
-            lblSubtitle.Text = _bannerConfig.Subtitle;
             lblTitle.ForeColor = ColorTranslator.FromHtml(_bannerConfig.TitleColor);
-            lblSubtitle.ForeColor = ColorTranslator.FromHtml(_bannerConfig.SubtitleColor);
 
             lblTitle.Font = new Font(_bannerConfig.TitleFont, _bannerConfig.TitleSize, FontStyle.Bold);
-            lblSubtitle.Font = new Font(_bannerConfig.SubtitleFont, _bannerConfig.SubtitleSize);
         }
         catch
         {
             // Fallback to defaults if banner config is invalid
             lblTitle.Text = "CheapSelfDrive Manager";
-            lblSubtitle.Text = "SFTP Drive Mounting Made Simple";
         }
     }
 
@@ -151,7 +147,7 @@ public partial class InstallOnlyForm : Form
     {
         try
         {
-            var status = _scriptExecutor.GetMountStatus(_currentConfig.MountName);
+            var status = _scriptExecutor.GetMountStatus(_currentConfig);
             var statusText = status switch
             {
                 MountStatus.NotConfigured => "Not Configured",
@@ -162,7 +158,7 @@ public partial class InstallOnlyForm : Form
                 _ => "Unknown"
             };
 
-            UpdateStatus($"Mount status: {statusText}");
+            UpdateStatus($"{_currentConfig.MountName} mount status: {statusText}");
         }
         catch (Exception ex)
         {
@@ -314,10 +310,5 @@ public partial class InstallOnlyForm : Form
     {
         btnInstall.Enabled = enabled;
         btnTest.Enabled = enabled;
-    }
-
-    private void txtLogs_TextChanged(object sender, EventArgs e)
-    {
-
     }
 }

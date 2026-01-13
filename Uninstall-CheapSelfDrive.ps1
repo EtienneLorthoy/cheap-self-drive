@@ -94,20 +94,7 @@ $driveLetterOnly = $DriveLetter.TrimEnd(':')
 Write-Info "=== Uninstall rclone SFTP mount: $MountName ($DriveLetter) ==="
 
 try {
-    # 1. Stop scheduled task if present
-    $task = Get-ScheduledTask -TaskName $taskName -ErrorAction SilentlyContinue
-    if ($task) {
-        Write-Info "Stopping scheduled task '$taskName'..."
-        Stop-ScheduledTask -TaskName $taskName -ErrorAction SilentlyContinue | Out-Null
-        Write-Info "Unregistering scheduled task '$taskName'..."
-        Unregister-ScheduledTask -TaskName $taskName -Confirm:$false -ErrorAction SilentlyContinue
-        Write-Ok  "Scheduled task removed."
-    }
-    else {
-        Write-Warn "Scheduled task '$taskName' not found."
-    }
-
-    # 2. Find and terminate rclone processes (using Get-Process as requested)
+    # 1. Find and terminate rclone processes (using Get-Process as requested)
     Write-Info 'Scanning for rclone processes (Get-Process)...'
     $allRclone = @(Get-Process -Name rclone -ErrorAction SilentlyContinue)
     $candidateProcesses = @()
@@ -144,33 +131,33 @@ try {
         Write-Warn 'No matching rclone mount process found.'
     }
 
-    # 3. Attempt to remove PSDrive if still listed
+    # 2. Attempt to remove PSDrive if still listed
     $psd = Get-PSDrive -Name $driveLetterOnly -ErrorAction SilentlyContinue
     if ($psd) {
         Write-Info "Removing PSDrive $DriveLetter..."
         Remove-PSDrive -Name $driveLetterOnly -Force -ErrorAction SilentlyContinue
     }
 
-    # 4. Clean up cache directory
+    # 3. Clean up cache directory
     if (Test-Path $cacheDir) {
         Write-Info "Removing cache directory $cacheDir"
         Remove-Item -Path $cacheDir -Recurse -Force -ErrorAction SilentlyContinue
     }
     else { Write-Warn "Cache directory not found: $cacheDir" }
 
-    # 5. Remove log file
+    # 4. Remove log file
     if (Test-Path $logFile) {
         Write-Info "Removing log file $logFile"
         Remove-Item -Path $logFile -Force -ErrorAction SilentlyContinue
     }
 
-    # 6. Remove generated mount script
+    # 5. Remove generated mount script
     if (Test-Path $mountScriptPath) {
         Write-Info "Removing mount script $mountScriptPath"
         Remove-Item -Path $mountScriptPath -Force -ErrorAction SilentlyContinue
     }
 
-    # 7. Remove stored password
+    # 6. Remove stored password
     Write-Info "Removing stored password for mount '$MountName'..."
     Remove-SecurePassword -MountName $MountName
 

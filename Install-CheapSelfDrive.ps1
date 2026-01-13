@@ -137,13 +137,6 @@ catch {
 # Refresh PATH to ensure tools are available
 $env:PATH = [System.Environment]::GetEnvironmentVariable("PATH", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("PATH", "User")
 
-# Step 2: Prepare main installation script path
-$mainScriptPath = Join-Path $PSScriptRoot 'Install-SFTPDiskScheduledTask.ps1'
-if (-not (Test-Path $mainScriptPath)) {
-    Write-Host  "Main installation script not found at: $mainScriptPath"
-    Read-Host "Press Enter to exit..."
-}
-
 Write-Host ""
 Write-Info "Step 2: Retrieving the password from Windows Credential Manager..."
 # Retrieve password from Windows Credential Manager
@@ -188,35 +181,4 @@ Write-Host "Create rclone alias remote"
 # Create the alias remote for mapping the nas path to the root of the future mounted disk
 rclone config --config "$RcloneConfig" create "$MountName" alias remote "${MountName}_base:$NASAbsolutePath"
 
-Write-Host ""
-Write-Info "Step 4: Installing scheduled task..."
-Write-Host "Main script: $mainScriptPath" -ForegroundColor Gray
-Write-Host "Config file: $ConfigPath" -ForegroundColor Gray
-Write-Host ""
-
-try {
-    
-    if ($ConfigPath -ne (Join-Path $PSScriptRoot 'config.json')) {
-        & $mainScriptPath -ConfigPath $ConfigPath
-    } else {
-        & $mainScriptPath
-    }
-    
-    $exitCode = $LASTEXITCODE
-    
-    if ($exitCode -eq 0) {
-        Write-Host ""
-        Write-Ok "Main installation completed successfully!"
-    } else {
-        Write-Host ""
-        Write-Warn "Main installation exited with code: $exitCode"
-        Read-Host "Press Enter to exit..."
-    }
-    
-    exit $exitCode
-}
-catch {
-    Write-Err "Failed to execute main installation script: $($_.Exception.Message)"
-    Read-Host "Press Enter to exit..."
-    throw
-}
+Write-Ok "Main installation completed successfully!"

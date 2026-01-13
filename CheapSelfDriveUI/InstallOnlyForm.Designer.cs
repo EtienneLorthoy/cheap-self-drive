@@ -30,7 +30,6 @@ namespace CheapSelfDriveUI
         {
             pnlBanner = new Panel();
             lblTitle = new Label();
-            lblSubtitle = new Label();
             grpCredentials = new GroupBox();
             lblUsername = new Label();
             txtUsername = new TextBox();
@@ -52,11 +51,10 @@ namespace CheapSelfDriveUI
             // 
             pnlBanner.BackColor = Color.FromArgb(240, 240, 240);
             pnlBanner.Controls.Add(lblTitle);
-            pnlBanner.Controls.Add(lblSubtitle);
             pnlBanner.Dock = DockStyle.Top;
             pnlBanner.Location = new Point(0, 0);
             pnlBanner.Name = "pnlBanner";
-            pnlBanner.Size = new Size(450, 60);
+            pnlBanner.Size = new Size(450, 38);
             pnlBanner.TabIndex = 0;
             // 
             // lblTitle
@@ -64,22 +62,11 @@ namespace CheapSelfDriveUI
             lblTitle.AutoSize = true;
             lblTitle.Font = new Font("Segoe UI", 19F, FontStyle.Bold);
             lblTitle.ForeColor = Color.FromArgb(44, 62, 80);
-            lblTitle.Location = new Point(15, 10);
+            lblTitle.Location = new Point(107, 2);
             lblTitle.Name = "lblTitle";
-            lblTitle.Size = new Size(331, 36);
+            lblTitle.Size = new Size(248, 36);
             lblTitle.TabIndex = 0;
-            lblTitle.Text = "Cheap Self Drive Manager";
-            // 
-            // lblSubtitle
-            // 
-            lblSubtitle.AutoSize = true;
-            lblSubtitle.Font = new Font("Segoe UI", 10F);
-            lblSubtitle.ForeColor = Color.FromArgb(127, 140, 141);
-            lblSubtitle.Location = new Point(29, 44);
-            lblSubtitle.Name = "lblSubtitle";
-            lblSubtitle.Size = new Size(103, 19);
-            lblSubtitle.TabIndex = 1;
-            lblSubtitle.Text = "Cloud drive like";
+            lblTitle.Text = "Self Drive Manager";
             // 
             // grpCredentials
             // 
@@ -88,9 +75,9 @@ namespace CheapSelfDriveUI
             grpCredentials.Controls.Add(lblPassword);
             grpCredentials.Controls.Add(txtPassword);
             grpCredentials.Controls.Add(btnShowPassword);
-            grpCredentials.Location = new Point(12, 70);
+            grpCredentials.Location = new Point(12, 40);
             grpCredentials.Name = "grpCredentials";
-            grpCredentials.Size = new Size(420, 80);
+            grpCredentials.Size = new Size(426, 80);
             grpCredentials.TabIndex = 1;
             grpCredentials.TabStop = false;
             grpCredentials.Text = "Credentials";
@@ -141,9 +128,9 @@ namespace CheapSelfDriveUI
             // 
             grpActions.Controls.Add(btnInstall);
             grpActions.Controls.Add(btnTest);
-            grpActions.Location = new Point(12, 160);
+            grpActions.Location = new Point(12, 126);
             grpActions.Name = "grpActions";
-            grpActions.Size = new Size(420, 54);
+            grpActions.Size = new Size(426, 54);
             grpActions.TabIndex = 2;
             grpActions.TabStop = false;
             grpActions.Text = "Actions";
@@ -169,9 +156,9 @@ namespace CheapSelfDriveUI
             // grpStatusAndLogs
             // 
             grpStatusAndLogs.Controls.Add(txtLogs);
-            grpStatusAndLogs.Location = new Point(12, 222);
+            grpStatusAndLogs.Location = new Point(12, 186);
             grpStatusAndLogs.Name = "grpStatusAndLogs";
-            grpStatusAndLogs.Size = new Size(420, 129);
+            grpStatusAndLogs.Size = new Size(426, 163);
             grpStatusAndLogs.TabIndex = 3;
             grpStatusAndLogs.TabStop = false;
             grpStatusAndLogs.Text = "Status && Logs";
@@ -183,9 +170,8 @@ namespace CheapSelfDriveUI
             txtLogs.Name = "txtLogs";
             txtLogs.ReadOnly = true;
             txtLogs.ScrollBars = ScrollBars.Vertical;
-            txtLogs.Size = new Size(408, 103);
+            txtLogs.Size = new Size(414, 137);
             txtLogs.TabIndex = 0;
-            txtLogs.TextChanged += txtLogs_TextChanged;
             // 
             // InstallOnlyForm
             // 
@@ -202,7 +188,7 @@ namespace CheapSelfDriveUI
             MinimumSize = new Size(466, 400);
             Name = "InstallOnlyForm";
             ShowIcon = false;
-            Text = "Cheap Self Drive - Installer";
+            Text = "Self Drive - Installer";
             pnlBanner.ResumeLayout(false);
             pnlBanner.PerformLayout();
             grpCredentials.ResumeLayout(false);
@@ -217,7 +203,6 @@ namespace CheapSelfDriveUI
 
         private Panel pnlBanner;
         private Label lblTitle;
-        private Label lblSubtitle;
         private GroupBox grpCredentials;
         private Label lblUsername;
         private TextBox txtUsername;

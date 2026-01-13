@@ -49,20 +49,15 @@ public class AdvancedSettings
 public class BannerConfig
 {
     public string Title { get; set; } = "CheapSelfDrive Manager";
-    public string Subtitle { get; set; } = "SFTP Drive Mounting Made Simple";
     public string BackgroundColor { get; set; } = "#f0f0f0";
     public string TitleColor { get; set; } = "#2c3e50";
-    public string SubtitleColor { get; set; } = "#7f8c8d";
     public string TitleFont { get; set; } = "Segoe UI";
-    public string SubtitleFont { get; set; } = "Segoe UI";
     public int TitleSize { get; set; } = 18;
-    public int SubtitleSize { get; set; } = 12;
     public string LogoPath { get; set; } = "";
     public int LogoWidth { get; set; } = 64;
     public int LogoHeight { get; set; } = 64;
     public string Alignment { get; set; } = "center";
     public int Padding { get; set; } = 10;
-    public bool InstallOnly { get; set; } = false;
 }
 
 public enum MountStatus

@@ -67,34 +67,7 @@ public class ScriptExecutor
         }
     }
 
-    public async Task<ExecutionResult> RunStartScript(string mountName)
-    {
-        try
-        {
-            var scriptPath = Path.Combine(_scriptDirectory, "Start-SFTPDiskScheduledTask.ps1");
-            if (!File.Exists(scriptPath))
-            {
-                return new ExecutionResult
-                {
-                    Success = false,
-                    Error = $"Start script not found at: {scriptPath}"
-                };
-            }
-
-            var arguments = $"-MountName '{mountName}'";
-            return await ExecutePowerShellScript(scriptPath, arguments, requireElevation: false);
-        }
-        catch (Exception ex)
-        {
-            return new ExecutionResult
-            {
-                Success = false,
-                Error = $"Failed to run start script: {ex.Message}"
-            };
-        }
-    }
-
-    public async Task<ExecutionResult> TestConnection(Config config, string password)
+    public async Task<ExecutionResult>  TestConnection(Config config, string password)
     {
         try
         {
@@ -131,19 +104,17 @@ try {{
         }
     }
 
-    public MountStatus GetMountStatus(string mountName)
+    public MountStatus GetMountStatus(Config config)
     {
         try
         {
-            // Check if scheduled task exists
-            var taskExists = CheckScheduledTaskExists(mountName);
-            
             // Check if drive is mounted
-            var driveExists = CheckDriveExists(mountName);
+            var driveExists = CheckDriveExists(config.DriveLetter);
+            var folderExists = Directory.Exists(config.VFSCacheDir);
 
             if (driveExists)
                 return MountStatus.Running;
-            else if (taskExists)
+            else if (folderExists)
                 return MountStatus.Installed;
             else
                 return MountStatus.NotConfigured;
@@ -231,7 +202,7 @@ try {{
         var startInfo = new ProcessStartInfo
         {
             FileName = "powershell.exe",
-            Arguments = $"-Command \"{command}\"",
+            Arguments = $"-Commmand \"{command}\"",
             UseShellExecute = false,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
@@ -265,38 +236,15 @@ try {{
         };
     }
 
-    private bool CheckScheduledTaskExists(string mountName)
+    private bool CheckDriveExists(string mountName, string letter)
     {
         try
         {
-            var taskName = $"SFTP Mount - {mountName}";
-            var startInfo = new ProcessStartInfo
-            {
-                FileName = "schtasks.exe",
-                Arguments = $"/query /tn \"{taskName}\"",
-                UseShellExecute = false,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                CreateNoWindow = true
-            };
-
-            using var process = Process.Start(startInfo);
-            process?.WaitForExit();
-            return process?.ExitCode == 0;
-        }
-        catch
-        {
-            return false;
-        }
-    }
-
-    private bool CheckDriveExists(string mountName)
-    {
-        try
-        {
-            // This is a simplified check - in reality, we'd need to check if the specific mount is active
             var drives = DriveInfo.GetDrives();
-            return drives.Any(d => d.IsReady && d.DriveType == DriveType.Network);
+            return drives.Any(d => d.IsReady 
+                && d.DriveFormat == "FUSE-rclone"
+                && d.DriveType == DriveType.Network
+                && d.VolumeLabel == letter);
         }
         catch
         {

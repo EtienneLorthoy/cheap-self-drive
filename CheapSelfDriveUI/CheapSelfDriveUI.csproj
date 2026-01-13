@@ -40,16 +40,10 @@
     <None Include="..\Install-CheapSelfDrive.ps1" Link="PowerShell\Install-CheapSelfDrive.ps1">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="..\Install-SFTPDiskScheduledTask.ps1" Link="PowerShell\Install-SFTPDiskScheduledTask.ps1">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Include="..\Mount-TEMPLATE-SFTPDisk.ps1" Link="PowerShell\Mount-TEMPLATE-SFTPDisk.ps1">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="..\Set-Password.ps1" Link="PowerShell\Set-Password.ps1">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="..\Start-SFTPDiskScheduledTask.ps1" Link="PowerShell\Start-SFTPDiskScheduledTask.ps1">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="..\Uninstall-CheapSelfDrive.ps1" Link="PowerShell\Uninstall-CheapSelfDrive.ps1">
