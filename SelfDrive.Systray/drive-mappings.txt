@@ -1,0 +1,3 @@
+# Drive mappings: one per line
+# Format: <DriveRoot>|<PowerShellScriptPath>
+# Example: F:\|C:\VFS\Mount-FastNas-SFTPDisk.ps1

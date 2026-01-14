@@ -1,4 +1,4 @@
-namespace CheapSelfDriveUI
+namespace SelfDriveInstaller
 {
     partial class InstallOnlyForm
     {
@@ -31,16 +31,18 @@ namespace CheapSelfDriveUI
             pnlBanner = new Panel();
             lblTitle = new Label();
             grpCredentials = new GroupBox();
+            btnTest = new Button();
             lblUsername = new Label();
             txtUsername = new TextBox();
             lblPassword = new Label();
             txtPassword = new TextBox();
             btnShowPassword = new Button();
             grpActions = new GroupBox();
+            button1 = new Button();
             btnInstall = new Button();
-            btnTest = new Button();
             grpStatusAndLogs = new GroupBox();
             txtLogs = new TextBox();
+            loadConfig = new Button();
             pnlBanner.SuspendLayout();
             grpCredentials.SuspendLayout();
             grpActions.SuspendLayout();
@@ -64,12 +66,13 @@ namespace CheapSelfDriveUI
             lblTitle.ForeColor = Color.FromArgb(44, 62, 80);
             lblTitle.Location = new Point(107, 2);
             lblTitle.Name = "lblTitle";
-            lblTitle.Size = new Size(248, 36);
+            lblTitle.Size = new Size(236, 36);
             lblTitle.TabIndex = 0;
-            lblTitle.Text = "Self Drive Manager";
+            lblTitle.Text = "Self Drive Installer";
             // 
             // grpCredentials
             // 
+            grpCredentials.Controls.Add(btnTest);
             grpCredentials.Controls.Add(lblUsername);
             grpCredentials.Controls.Add(txtUsername);
             grpCredentials.Controls.Add(lblPassword);
@@ -81,6 +84,15 @@ namespace CheapSelfDriveUI
             grpCredentials.TabIndex = 1;
             grpCredentials.TabStop = false;
             grpCredentials.Text = "Credentials";
+            // 
+            // btnTest
+            // 
+            btnTest.Location = new Point(361, 17);
+            btnTest.Name = "btnTest";
+            btnTest.Size = new Size(49, 25);
+            btnTest.TabIndex = 5;
+            btnTest.Text = "Test";
+            btnTest.UseVisualStyleBackColor = true;
             // 
             // lblUsername
             // 
@@ -95,7 +107,7 @@ namespace CheapSelfDriveUI
             // 
             txtUsername.Location = new Point(80, 17);
             txtUsername.Name = "txtUsername";
-            txtUsername.Size = new Size(330, 23);
+            txtUsername.Size = new Size(275, 23);
             txtUsername.TabIndex = 1;
             // 
             // lblPassword
@@ -111,29 +123,40 @@ namespace CheapSelfDriveUI
             // 
             txtPassword.Location = new Point(80, 47);
             txtPassword.Name = "txtPassword";
-            txtPassword.Size = new Size(300, 23);
+            txtPassword.Size = new Size(275, 23);
             txtPassword.TabIndex = 3;
             txtPassword.UseSystemPasswordChar = true;
             // 
             // btnShowPassword
             // 
-            btnShowPassword.Location = new Point(385, 47);
+            btnShowPassword.Location = new Point(361, 47);
             btnShowPassword.Name = "btnShowPassword";
-            btnShowPassword.Size = new Size(25, 23);
+            btnShowPassword.Size = new Size(49, 23);
             btnShowPassword.TabIndex = 4;
-            btnShowPassword.Text = "👁";
+            btnShowPassword.Text = "Show";
             btnShowPassword.UseVisualStyleBackColor = true;
             // 
             // grpActions
             // 
+            grpActions.Controls.Add(loadConfig);
+            grpActions.Controls.Add(button1);
             grpActions.Controls.Add(btnInstall);
-            grpActions.Controls.Add(btnTest);
             grpActions.Location = new Point(12, 126);
             grpActions.Name = "grpActions";
             grpActions.Size = new Size(426, 54);
             grpActions.TabIndex = 2;
             grpActions.TabStop = false;
             grpActions.Text = "Actions";
+            // 
+            // button1
+            // 
+            button1.Location = new Point(141, 20);
+            button1.Name = "button1";
+            button1.Size = new Size(96, 25);
+            button1.TabIndex = 2;
+            button1.Text = "Update Status";
+            button1.UseVisualStyleBackColor = true;
+            button1.Click += button1_Click;
             // 
             // btnInstall
             // 
@@ -143,15 +166,6 @@ namespace CheapSelfDriveUI
             btnInstall.TabIndex = 0;
             btnInstall.Text = "Install && Configure";
             btnInstall.UseVisualStyleBackColor = true;
-            // 
-            // btnTest
-            // 
-            btnTest.Location = new Point(145, 20);
-            btnTest.Name = "btnTest";
-            btnTest.Size = new Size(80, 25);
-            btnTest.TabIndex = 1;
-            btnTest.Text = "Test";
-            btnTest.UseVisualStyleBackColor = true;
             // 
             // grpStatusAndLogs
             // 
@@ -172,6 +186,16 @@ namespace CheapSelfDriveUI
             txtLogs.ScrollBars = ScrollBars.Vertical;
             txtLogs.Size = new Size(414, 137);
             txtLogs.TabIndex = 0;
+            // 
+            // loadConfig
+            // 
+            loadConfig.Location = new Point(243, 20);
+            loadConfig.Name = "loadConfig";
+            loadConfig.Size = new Size(96, 25);
+            loadConfig.TabIndex = 3;
+            loadConfig.Text = "Load Config";
+            loadConfig.UseVisualStyleBackColor = true;
+            loadConfig.Click += loadConfig_Click;
             // 
             // InstallOnlyForm
             // 
@@ -211,8 +235,10 @@ namespace CheapSelfDriveUI
         private Button btnShowPassword;
         private GroupBox grpActions;
         private Button btnInstall;
-        private Button btnTest;
         private GroupBox grpStatusAndLogs;
         private TextBox txtLogs;
+        private Button button1;
+        private Button btnTest;
+        private Button loadConfig;
     }
 }

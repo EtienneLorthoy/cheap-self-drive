@@ -1,0 +1,22 @@
+{
+  "MountName": "EXAMPLE",
+  "DriveLetter": "H:",
+  "NASAddress": "YOURNASHOSTNAMEORIP",
+  "NASUsername": "",
+  "NASPort": 22,
+  "NASAbsolutePath": "/mnt/nstor/data1/projects",
+  "ShellType": "unix",
+  "InstallDirectory": "C:\\SelfDrive",
+  "VFSCacheDir": "C:\\SelfDrive\\VFS\\{MountName}",
+  "RcloneLogs": "C:\\SelfDrive\\{MountName}.log",
+  "RcloneConfigDir": "{APPDATA}\\rclone\\rclone.conf",
+  "AdvancedSettings": {
+    "CacheMode": "full",
+    "CacheMaxSize": "20G",
+    "CacheMaxAge": "168h",
+    "DirCacheTime": "30s",
+    "PollInterval": "15s",
+    "BufferSize": "16M",
+    "CacheMinFreeSpace": "20G"
+  }
+}

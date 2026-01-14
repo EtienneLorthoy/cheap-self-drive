@@ -56,13 +56,14 @@ trap {
 if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
     Write-Warn 'Administrator privileges are required. Restarting as administrator...'
 
-    $argumentList = @()
-    $argumentList += '-File'
-    $argumentList += "`"$($MyInvocation.MyCommand.Path)`""
+    $argumentList = @(
+        '-File'
+        $MyInvocation.MyCommand.Path
+    )
     
     if ($ConfigPath -ne (Join-Path $PSScriptRoot 'config.json')) {
         $argumentList += '-ConfigPath'
-        $argumentList += "`"$ConfigPath`""
+        $argumentList += $ConfigPath
     }
     
     try {

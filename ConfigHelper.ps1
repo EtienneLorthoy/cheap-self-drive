@@ -230,7 +230,7 @@ function Get-SFTPDiskConfig {
         $config.RcloneConfigDir = $config.RcloneConfigDir -replace '\{APPDATA\}', $env:APPDATA
         
         # Add computed properties
-        $config | Add-Member -NotePropertyName 'RcloneConfig' -NotePropertyValue (Join-Path $config.RcloneConfigDir 'rclone.conf')
+        $config | Add-Member -NotePropertyName 'RcloneConfig' -NotePropertyValue ($config.RcloneConfigDir)
         $config | Add-Member -NotePropertyName 'MountScriptPath' -NotePropertyValue "C:\VFS\Mount-$($config.MountName)-SFTPDisk.ps1"
         $config | Add-Member -NotePropertyName 'TaskName' -NotePropertyValue "$($config.MountName) Rclone Mount"
         

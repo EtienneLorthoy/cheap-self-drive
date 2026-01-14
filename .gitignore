@@ -48,3 +48,5 @@ config.json
 CheapSelfDriveUI/.vs
 CheapSelfDriveUI/CheapSelfDriveUI.csproj.user
 config.*.json
+.vs/
+/SelfDriveUI/SelfDrive.Installer.csproj.user

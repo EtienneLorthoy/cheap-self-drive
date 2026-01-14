@@ -39,11 +39,11 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
 # These placeholder values will be replaced by the installer-generated copy
-$MountName    = 'REPLACED_BY_INSTALLER'
-$DriveLetter  = 'REPLACED_BY_INSTALLER'  # e.g. 'v:'
-$VFSCacheDir  = 'REPLACED_BY_INSTALLER'
-$RcloneLogs   = 'REPLACED_BY_INSTALLER'
-$RcloneConfig = 'REPLACED_BY_INSTALLER'
+$MountName    = '{{MOUNT_NAME}}'
+$DriveLetter  = '{{DRIVE_LETTER}}'  # e.g. 'v:'
+$VFSCacheDir  = '{{VFS_CACHE_DIR}}'
+$RcloneLogs   = '{{RCLONE_LOGS}}'
+$RcloneConfig = '{{RCLONE_CONFIG}}'
 
 try {
     Write-Host "Mount script starting for $MountName -> $DriveLetter"

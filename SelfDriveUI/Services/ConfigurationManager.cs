@@ -1,22 +1,19 @@
-using CheapSelfDriveUI.Models;
+using SelfDriveInstaller.Models;
 using Newtonsoft.Json;
 
-namespace CheapSelfDriveUI.Services;
+namespace SelfDriveInstaller.Services;
 
-public class ConfigurationManager
+internal class ConfigurationManager
 {
-    public Config LoadConfiguration(string path)
+    internal Config LoadConfiguration(string path)
     {
         try
         {
-            if (!File.Exists(path))
-            {
-                return GetDefaultConfiguration();
-            }
+            if (!File.Exists(path)) new Config();
 
             var json = File.ReadAllText(path);
             var config = JsonConvert.DeserializeObject<Config>(json);
-            return config ?? GetDefaultConfiguration();
+            return config ?? new Config();
         }
         catch (Exception ex)
         {
@@ -24,7 +21,7 @@ public class ConfigurationManager
         }
     }
 
-    public void SaveConfiguration(Config config, string path)
+    internal void SaveConfiguration(Config config, string path)
     {
         try
         {
@@ -45,7 +42,7 @@ public class ConfigurationManager
         }
     }
 
-    public void ValidateConfiguration(Config config)
+    internal void ValidateConfiguration(Config config)
     {
         var errors = new List<string>();
 
@@ -93,43 +90,6 @@ public class ConfigurationManager
         if (errors.Any())
         {
             throw new ArgumentException($"Configuration validation failed:\n{string.Join("\n", errors)}");
-        }
-    }
-
-    public Config GetDefaultConfiguration()
-    {
-        return new Config
-        {
-            MountName = "MyNAS",
-            DriveLetter = "X:",
-            NASAddress = "192.168.1.100",
-            NASUsername = "",
-            NASPort = 22,
-            NASAbsolutePath = "/",
-            ShellType = "unix",
-            VFSCacheDir = "C:\\VFS\\{MountName}",
-            RcloneLogs = "C:\\VFS\\{MountName}.log",
-            RcloneConfigDir = "{APPDATA}\\rclone",
-            AdvancedSettings = new AdvancedSettings()
-        };
-    }
-
-    public BannerConfig LoadBannerConfiguration(string path)
-    {
-        try
-        {
-            if (!File.Exists(path))
-            {
-                return new BannerConfig();
-            }
-
-            var json = File.ReadAllText(path);
-            var bannerConfig = JsonConvert.DeserializeObject<BannerConfig>(json);
-            return bannerConfig ?? new BannerConfig();
-        }
-        catch
-        {
-            return new BannerConfig();
         }
     }
 

@@ -1,18 +1,19 @@
 using Newtonsoft.Json;
 
-namespace CheapSelfDriveUI.Models;
+namespace SelfDriveInstaller.Models;
 
 public class Config
 {
-    public string MountName { get; set; } = "MyNAS";
+    public string MountName { get; set; } = "UNVALID";
     public string DriveLetter { get; set; } = "X:";
-    public string NASAddress { get; set; } = "192.168.1.100";
+    public string NASAddress { get; set; } = "Unvalid";
     public string NASUsername { get; set; } = "";
     public int NASPort { get; set; } = 22;
     public string NASAbsolutePath { get; set; } = "/";
     public string ShellType { get; set; } = "unix";
-    public string VFSCacheDir { get; set; } = "C:\\VFS\\{MountName}";
-    public string RcloneLogs { get; set; } = "C:\\VFS\\{MountName}.log";
+    public string InstallDirectory { get; set; } = "C:\\SelfDrive";
+    public string VFSCacheDir { get; set; } = "C:\\SelfDrive\\VFS\\{MountName}";
+    public string RcloneLogs { get; set; } = "C:\\SelfDrive\\VFS\\{MountName}.log";
     public string RcloneConfigDir { get; set; } = "{APPDATA}\\rclone";
     public AdvancedSettings AdvancedSettings { get; set; } = new();
 
@@ -44,20 +45,6 @@ public class AdvancedSettings
     public string PollInterval { get; set; } = "15s";
     public string BufferSize { get; set; } = "16M";
     public string CacheMinFreeSpace { get; set; } = "20G";
-}
-
-public class BannerConfig
-{
-    public string Title { get; set; } = "CheapSelfDrive Manager";
-    public string BackgroundColor { get; set; } = "#f0f0f0";
-    public string TitleColor { get; set; } = "#2c3e50";
-    public string TitleFont { get; set; } = "Segoe UI";
-    public int TitleSize { get; set; } = 18;
-    public string LogoPath { get; set; } = "";
-    public int LogoWidth { get; set; } = 64;
-    public int LogoHeight { get; set; } = 64;
-    public string Alignment { get; set; } = "center";
-    public int Padding { get; set; } = 10;
 }
 
 public enum MountStatus
